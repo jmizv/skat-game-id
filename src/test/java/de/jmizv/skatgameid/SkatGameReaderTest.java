@@ -14,6 +14,5 @@ class SkatGameReaderTest {
         SkatGameReader skatGameReader = new SkatGameReader();
         Game read = skatGameReader.read(new File(getClass().getResource("/sample_game").getFile()));
         assertThat(read).isNotNull();
-
     }
 }
