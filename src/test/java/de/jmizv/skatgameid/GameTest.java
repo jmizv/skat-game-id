@@ -2,8 +2,10 @@ package de.jmizv.skatgameid;
 
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.util.List;
+import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.*;
 
 class GameTest {
 
@@ -23,6 +25,23 @@ class GameTest {
     }
 
     @Test
+    void cards_are_sorted() {
+        Game game = Game.random(0);
+        assertCollectionIsSorted(game.getPlayerFront());
+        assertCollectionIsSorted(game.getPlayerMiddle());
+        assertCollectionIsSorted(game.getPlayerRear());
+        assertCollectionIsSorted(game.getSkat());
+    }
+
+    private void assertCollectionIsSorted(List<Card> cards) {
+        for (int i = 1; i < cards.size(); ++i) {
+            Card card1 = cards.get(i - 1);
+            Card card2 = cards.get(i);
+            assertThat(card1).isLessThan(card2);
+        }
+    }
+
+    @Test
     void not_more_than_10_cards_for_players() {
         Game.Builder gameBuilder = Game.builder();
         gameBuilder.addCard(Card.of("S7"), 1)
@@ -33,9 +52,9 @@ class GameTest {
                 .addCard(Card.of("SO"), 1)
                 .addCard(Card.of("SK"), 1)
                 .addCard(Card.of("SA"), 1)
-                .addCard(Card.of("H7"), 1)
-                .addCard(Card.of("H8"), 1);
-        assertThatThrownBy(() -> gameBuilder.addCard(Card.of("H8"), 1)).isInstanceOf(IllegalArgumentException.class);
+                .addCard(Card.of("R7"), 1)
+                .addCard(Card.of("R8"), 1);
+        assertThatThrownBy(() -> gameBuilder.addCard(Card.of("R8"), 1)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -43,24 +62,55 @@ class GameTest {
         Game.Builder gameBuilder = Game.builder();
         gameBuilder.addCardToSkat(Card.of("S7"))
                 .addCardToSkat(Card.of("S8"));
-        assertThatThrownBy(() -> gameBuilder.addCardToSkat(Card.of("H8"))).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> gameBuilder.addCardToSkat(Card.of("R8"))).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void cannot_build_on_less_than_32_cards() {
         Game.Builder gameBuilder = Game.builder();
-        int count = 0;
         for (Suit suit : Suit.values()) {
             for (Value value : Value.values()) {
                 assertThatThrownBy(gameBuilder::build).isInstanceOf(IllegalStateException.class);
-                if (count < 30) {
-                    gameBuilder.addCard(new Card(suit, value), 1 + count / 10);
-                } else {
-                    gameBuilder.addCardToSkat(new Card(suit, value));
-                }
-                count++;
+                gameBuilder.addCard(new Card(suit, value));
             }
         }
         assertThatCode(gameBuilder::build).doesNotThrowAnyException();
+    }
+
+    @Test
+    void random_game() {
+        Game random1 = Game.random(0);
+        Game random2 = Game.random(0);
+        Game random3 = Game.random();
+        assertThat(random1).isEqualTo(random2);
+        assertThat(random1).isNotEqualTo(random3);
+    }
+
+    @Test
+    void compute_id() {
+        Game game = Game.random(0);
+        assertThat(game.computeId()).isNotNull();
+    }
+
+    @Test
+    void from_id() {
+        Game game = Game.ofId("MYKAmZXGhaQ");
+        assertThat(game).isNotNull();
+        assertThat(game).isEqualTo(Game.random(0));
+    }
+
+    @Test
+    void test_exceptions() {
+        assertThatThrownBy(() -> Game.ofId("")).isInstanceOf(IllegalArgumentException.class).hasMessage("Game id \"\" is too short.");
+        assertThatThrownBy(() -> Game.ofId("0")).isInstanceOf(IllegalArgumentException.class).hasMessage("Game id \"0\" is too short.");
+        assertThatThrownBy(() -> Game.ofId("g")).isInstanceOf(IllegalArgumentException.class).hasMessage("Game id \"g\" is too short.");
+        assertThatThrownBy(() -> Game.ofId("0000")).isInstanceOf(IllegalArgumentException.class).hasMessage("Cannot add any more cards. Have already 2 cards for Skat.");
+        assertThatThrownBy(() -> Game.ofId("mykAmZXGhaQ")).isInstanceOf(IllegalArgumentException.class).hasMessage("Cannot add any more cards. Have already 10 cards for Middle-Player.");
+        assertThatThrownBy(() -> Game.ofId("mykAmZXGhaQmykAmZXGhaQ")).isInstanceOf(IllegalArgumentException.class).hasMessage("Game id \"mykAmZXGhaQmykAmZXGhaQ\" is not compatible for decoding as it results in 64 cards.");
+    }
+
+    @Test
+    void v() {
+
     }
 }

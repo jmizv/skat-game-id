@@ -1,7 +1,6 @@
 package de.jmizv.skatgameid;
 
 import java.io.*;
-import java.util.function.Consumer;
 
 public class SkatGameReader {
 
@@ -9,20 +8,30 @@ public class SkatGameReader {
         return read(new FileInputStream(file));
     }
 
-    private static void add(String line, Consumer<Card> consumer) {
-        for (int i = 0; i < line.length(); i += 2) {
-            String substring = line.substring(i, i + 2);
-            consumer.accept(Card.of(substring));
-        }
+    private static String normalize(String input) {
+        return input.replace(" ", "")
+                .replace("\t", "")
+                .replace("\r", "")
+                .replace("\n", "");
     }
 
     public Game read(InputStream inputStream) throws IOException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             Game.Builder gameBuilder = Game.builder();
-            add(reader.readLine(), card -> gameBuilder.addCard(card, 1));
-            add(reader.readLine(), card -> gameBuilder.addCard(card, 2));
-            add(reader.readLine(), card -> gameBuilder.addCard(card, 3));
-            add(reader.readLine(), gameBuilder::addCardToSkat);
+            String line;
+            while (true) {
+                line = reader.readLine();
+                if (line == null) {
+                    break;
+                }
+                line = normalize(line);
+                if (line.length() % 2 != 0) {
+                    throw new IllegalArgumentException("Line has illegal format: " + line);
+                }
+                for (int i = 0; i < line.length(); i += 2) {
+                    gameBuilder.addCard(Card.of(line.substring(i, i + 2)));
+                }
+            }
             return gameBuilder.build();
         }
     }
