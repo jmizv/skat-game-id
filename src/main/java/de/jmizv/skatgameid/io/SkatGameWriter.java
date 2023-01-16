@@ -1,11 +1,14 @@
-package de.jmizv.skatgameid;
+package de.jmizv.skatgameid.io;
+
+import de.jmizv.skatgameid.Game;
 
 import java.io.*;
+import java.nio.file.Files;
 
 public class SkatGameWriter {
 
     public void write(Game game, File file) throws IOException {
-        write(game, new FileOutputStream(file));
+        write(game, Files.newOutputStream(file.toPath()));
     }
 
     public void write(Game game, OutputStream outputStream) {

@@ -48,4 +48,72 @@ class CardTest {
             assertThat(cards.add(card)).isTrue();
         }
     }
+
+    @Test
+    void can_be_played_upon() {
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.NULL)).isTrue();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.GRAND)).isTrue();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.DIAMONDS)).isTrue();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.HEARTS)).isTrue();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.SPADES)).isTrue();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.CLUBS)).isTrue();
+
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.NULL)).isTrue();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.GRAND)).isFalse();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.DIAMONDS)).isTrue();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.HEARTS)).isFalse();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.SPADES)).isFalse();
+        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.CLUBS)).isFalse();
+
+        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.NULL)).isTrue();
+        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.GRAND)).isFalse();
+        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.DIAMONDS)).isTrue();
+        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.HEARTS)).isFalse();
+        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.SPADES)).isFalse();
+        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.CLUBS)).isFalse();
+    }
+
+    @Test
+    void is_trump() {
+        assertThat(Card.of("GU").isTrump(GameTypeKind.GRAND)).isTrue();
+        assertThat(Card.of("GU").isTrump(GameTypeKind.NULL)).isFalse();
+        assertThat(Card.of("GU").isTrump(GameTypeKind.CLUBS)).isTrue();
+        assertThat(Card.of("GU").isTrump(GameTypeKind.SPADES)).isTrue();
+        assertThat(Card.of("GU").isTrump(GameTypeKind.HEARTS)).isTrue();
+        assertThat(Card.of("GU").isTrump(GameTypeKind.DIAMONDS)).isTrue();
+
+        assertThat(Card.of("SA").isTrump(GameTypeKind.GRAND)).isFalse();
+        assertThat(Card.of("SA").isTrump(GameTypeKind.NULL)).isFalse();
+        assertThat(Card.of("SA").isTrump(GameTypeKind.CLUBS)).isFalse();
+        assertThat(Card.of("SA").isTrump(GameTypeKind.SPADES)).isFalse();
+        assertThat(Card.of("SA").isTrump(GameTypeKind.HEARTS)).isFalse();
+        assertThat(Card.of("SA").isTrump(GameTypeKind.DIAMONDS)).isTrue();
+
+        assertThat(Card.of("E7").isTrump(GameTypeKind.GRAND)).isFalse();
+        assertThat(Card.of("E7").isTrump(GameTypeKind.NULL)).isFalse();
+        assertThat(Card.of("E7").isTrump(GameTypeKind.CLUBS)).isTrue();
+        assertThat(Card.of("E7").isTrump(GameTypeKind.SPADES)).isFalse();
+        assertThat(Card.of("E7").isTrump(GameTypeKind.HEARTS)).isFalse();
+        assertThat(Card.of("E7").isTrump(GameTypeKind.DIAMONDS)).isFalse();
+
+        assertThat(Card.of("GX").isTrump(GameTypeKind.GRAND)).isFalse();
+        assertThat(Card.of("GX").isTrump(GameTypeKind.NULL)).isFalse();
+        assertThat(Card.of("GX").isTrump(GameTypeKind.CLUBS)).isFalse();
+        assertThat(Card.of("GX").isTrump(GameTypeKind.SPADES)).isTrue();
+        assertThat(Card.of("GX").isTrump(GameTypeKind.HEARTS)).isFalse();
+        assertThat(Card.of("GX").isTrump(GameTypeKind.DIAMONDS)).isFalse();
+
+        assertThat(Card.of("RO").isTrump(GameTypeKind.GRAND)).isFalse();
+        assertThat(Card.of("RO").isTrump(GameTypeKind.NULL)).isFalse();
+        assertThat(Card.of("RO").isTrump(GameTypeKind.CLUBS)).isFalse();
+        assertThat(Card.of("RO").isTrump(GameTypeKind.SPADES)).isFalse();
+        assertThat(Card.of("RO").isTrump(GameTypeKind.HEARTS)).isTrue();
+        assertThat(Card.of("RO").isTrump(GameTypeKind.DIAMONDS)).isFalse();
+    }
+
+    @Test
+    void beats_same_card() {
+        assertThatThrownBy(() -> Card.of(32).beats(GameTypeKind.GRAND, Card.of(32)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }

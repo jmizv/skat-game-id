@@ -1,6 +1,9 @@
-package de.jmizv.skatgameid;
+package de.jmizv.skatgameid.io;
 
-import org.junit.jupiter.api.Test;
+import de.jmizv.skatgameid.Card;
+import de.jmizv.skatgameid.Game;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,19 +13,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SkatGameReaderTest {
 
-    @Test
-    void test_read_default() throws IOException {
-        test_read("/sample_game_default");
-    }
-
-    @Test
-    void test_read_compact() throws IOException {
-        test_read("/sample_game_compact");
-    }
-
-    @Test
-    void test_read_expanded() throws IOException {
-        test_read("/sample_game_expanded");
+    @ParameterizedTest
+    @ValueSource(strings = {"/game/sample_game_default", "/game/sample_game_compact", "/game/sample_game_expanded"})
+    void test_read_default(String resourceName) throws IOException {
+        test_read(resourceName);
     }
 
     private void test_read(String resourceName) throws IOException {

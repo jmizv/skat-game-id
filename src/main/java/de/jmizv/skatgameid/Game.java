@@ -3,6 +3,7 @@ package de.jmizv.skatgameid;
 import com.google.common.collect.ImmutableList;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Verify.verify;
 
@@ -19,15 +20,34 @@ public class Game {
     private final List<Card> _player3Rear; // 10 cards
     private final List<Card> _skat; // 2 cards
 
+    /**
+     * Creates a new game instance with the given cards. No sorting is done.
+     *
+     * @param player1Front  the ten cards for the front player
+     * @param player2Middle the ten cards for the middle player
+     * @param player3Rear   the ten cards for the rear player
+     * @param skat          the two cards for the skat
+     */
     private Game(List<Card> player1Front, List<Card> player2Middle, List<Card> player3Rear, List<Card> skat) {
         verify(Objects.requireNonNull(player1Front).size() == 10, "Player 1 needs 10 cards.");
         verify(Objects.requireNonNull(player2Middle).size() == 10, "Player 2 needs 10 cards.");
         verify(Objects.requireNonNull(player3Rear).size() == 10, "Player 3 needs 10 cards.");
         verify(Objects.requireNonNull(skat).size() == 2, "The Skat needs 2 cards.");
-        _player1Front = player1Front.stream().sorted().collect(ImmutableList.toImmutableList());
-        _player2Middle = player2Middle.stream().sorted().collect(ImmutableList.toImmutableList());
-        _player3Rear = player3Rear.stream().sorted().collect(ImmutableList.toImmutableList());
-        _skat = skat.stream().sorted().collect(ImmutableList.toImmutableList());
+        _player1Front = player1Front.stream().collect(ImmutableList.toImmutableList());
+        _player2Middle = player2Middle.stream().collect(ImmutableList.toImmutableList());
+        _player3Rear = player3Rear.stream().collect(ImmutableList.toImmutableList());
+        _skat = skat.stream().collect(ImmutableList.toImmutableList());
+    }
+
+    /**
+     *
+     * @return the same card distribution for this game but with all cards sorted by their values
+     */
+    public Game normalized() {
+        return new Game(_player1Front.stream().sorted().collect(Collectors.toList()),
+                _player2Middle.stream().sorted().collect(Collectors.toList()),
+                _player3Rear.stream().sorted().collect(Collectors.toList()),
+                _skat.stream().sorted().collect(Collectors.toList()));
     }
 
     public List<Card> getPlayerFront() {
@@ -46,19 +66,36 @@ public class Game {
         return _skat;
     }
 
-    public String computeId() {
+    /**
+     * Generates the game id in a bitset object.
+     * <p>
+     * As we have 32 cards and 3 player and the skat we set for every card to which of the four stacks it belongs. 0x0 is
+     * forehand, 0x1 is middle hand, 0x10 is rear hand and finally 0x11 is the skat.
+     *
+     * @return the game id as a bitset
+     */
+    BitSet computeIdAsBitSet() {
         BitSet bitSet = new BitSet(32 * 2);
-        for (Card c : getPlayerMiddle()) {
-            bitSet.set(c.number() * 2);
+        for (Card card : getPlayerMiddle()) {
+            bitSet.set(card.number() * 2);
         }
-        for (Card c : getPlayerRear()) {
-            bitSet.set(c.number() * 2 + 1);
+        for (Card card : getPlayerRear()) {
+            bitSet.set(card.number() * 2 + 1);
         }
-        for (Card c : getSkat()) {
-            bitSet.set(c.number() * 2);
-            bitSet.set(c.number() * 2 + 1);
+        for (Card card : getSkat()) {
+            bitSet.set(card.number() * 2);
+            bitSet.set(card.number() * 2 + 1);
         }
-        return Base64.getEncoder().encodeToString(bitSet.toByteArray());
+        return bitSet;
+    }
+
+    /**
+     * Generates the game id as a base64 encoded string
+     *
+     * @return the game id as a string
+     */
+    public String computeId() {
+        return Base64.getEncoder().encodeToString(computeIdAsBitSet().toByteArray());
     }
 
     public static Game ofId(String id) {
@@ -127,7 +164,7 @@ public class Game {
         private final List<Card> _player3 = new ArrayList<>(); // 10 cards
         private final List<Card> _skat = new ArrayList<>(); // 2 cards
 
-        private transient final Set<Card> _all = new HashSet<>() {
+        private transient final Set<Card> _all = new HashSet<Card>() {
             @Override
             public boolean add(Card card) {
                 boolean add = super.add(card);
@@ -146,20 +183,35 @@ public class Game {
          */
         public Builder addCard(Card card, int player) {
             switch (player) {
-                case 1 -> addToPlayer(_player1, card, PLAYER_FRONT);
-                case 2 -> addToPlayer(_player2, card, PLAYER_MIDDLE);
-                case 3 -> addToPlayer(_player3, card, PLAYER_REAR);
-                default -> throw new IllegalArgumentException(String.format("Player %s does not exist.", player));
+                case 1:
+                    addToPlayer(_player1, card, PLAYER_FRONT);
+                    break;
+                case 2:
+                    addToPlayer(_player2, card, PLAYER_MIDDLE);
+                    break;
+                case 3:
+                    addToPlayer(_player3, card, PLAYER_REAR);
+                    break;
+                default:
+                    throw new IllegalArgumentException(String.format("Player %s does not exist.", player));
             }
             return this;
         }
 
         public Builder addCard(Card card) {
             switch (_all.size() / 10) {
-                case 0 -> addToPlayer(_player1, card, PLAYER_FRONT);
-                case 1 -> addToPlayer(_player2, card, PLAYER_MIDDLE);
-                case 2 -> addToPlayer(_player3, card, PLAYER_REAR);
-                case 3 -> addCardToSkat(card);
+                case 0:
+                    addToPlayer(_player1, card, PLAYER_FRONT);
+                    break;
+                case 1:
+                    addToPlayer(_player2, card, PLAYER_MIDDLE);
+                    break;
+                case 2:
+                    addToPlayer(_player3, card, PLAYER_REAR);
+                    break;
+                case 3:
+                    addCardToSkat(card);
+                    break;
             }
             return this;
         }
@@ -188,6 +240,10 @@ public class Game {
                 throw new IllegalStateException("Game cannot be build. There are only " + _all + " card(s) set.");
             }
             return new Game(_player1, _player2, _player3, _skat);
+        }
+
+        public int cardsAdded() {
+            return _player1.size() + _player2.size() + _player3.size() + _skat.size();
         }
     }
 }

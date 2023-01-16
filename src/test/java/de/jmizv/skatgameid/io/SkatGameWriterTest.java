@@ -1,5 +1,6 @@
-package de.jmizv.skatgameid;
+package de.jmizv.skatgameid.io;
 
+import de.jmizv.skatgameid.Game;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
