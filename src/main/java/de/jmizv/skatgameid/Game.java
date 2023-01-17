@@ -2,6 +2,7 @@ package de.jmizv.skatgameid;
 
 import com.google.common.collect.ImmutableList;
 
+import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -69,7 +70,7 @@ public class Game {
     /**
      * Generates the game id in a bitset object.
      * <p>
-     * As we have 32 cards and 3 player and the skat we set for every card to which of the four stacks it belongs. 0x0 is
+     * As we have 32 cards and 3 player and the skat, we set for every card to which of the four stacks it belongs. 0x0 is
      * forehand, 0x1 is middle hand, 0x10 is rear hand and finally 0x11 is the skat.
      *
      * @return the game id as a bitset
@@ -96,6 +97,10 @@ public class Game {
      */
     public String computeId() {
         return Base64.getEncoder().encodeToString(computeIdAsBitSet().toByteArray());
+    }
+
+    public BigInteger computeIdAsBigInteger() {
+        return new BigInteger(computeIdAsBitSet().toByteArray());
     }
 
     public static Game ofId(String id) {

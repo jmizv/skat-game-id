@@ -55,8 +55,11 @@ all in one line without problems. Capitalization should also be neglected but up
 
 Note that we don't demand that the cards are ordered from low to high for each stack. Although a normalization is offered.
 
-The above schema converts to the following ID: `AABQVVWqqvo=`. Note that it is simply all cards
-ordered from lowest to highest.
+The above schema converts to the following ID via the method `computeId`: `AABQVVWqqvo=`. Note that it is simply all cards
+ordered from lowest to highest. To convert this to a decimal number, the method `computeIdAsBigInteger` helps.
+So the real decimal ID would be then: `88327439690490`. 
+
+If we reverse this order, the ID becomes `r6qqVVUF` or `-88327439690491`.
 
 
 ### Game Run
@@ -90,3 +93,4 @@ R7R8 -- Skat on announced game
 901
 ```
 
+There first four lines are equal to the `Game` notation.

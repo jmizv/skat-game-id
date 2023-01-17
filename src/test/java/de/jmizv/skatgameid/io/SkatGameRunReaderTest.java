@@ -17,9 +17,9 @@ class SkatGameRunReaderTest {
     @Test
     void shoud() throws IOException {
         String resourceName = "/gamerun/sample_game_run";
-        SkatGameRunReader skatGameReader = new SkatGameRunReader();
         URL resource = getClass().getResource(resourceName);
         assertThat(resource).isNotNull();
+        SkatGameRunReader skatGameReader = new SkatGameRunReader();
         GameRun gameRun = skatGameReader.read(new File(resource.getFile()));
         String id = gameRun.computeId();
         assertThat(id).isNotNull();
@@ -34,6 +34,6 @@ class SkatGameRunReaderTest {
         assertThat(gameRun.gameType().isOuvertAnnounced()).isTrue();
         assertThat(gameRun.skatCard(0)).isEqualTo(Card.of("R7"));
         assertThat(gameRun.skatCard(1)).isEqualTo(Card.of("R8"));
-        assertThat(gameRun.trick(1)).isEqualTo(new Card[]{Card.of("S8"), Card.of("RX"), Card.of("GO")});
+        assertThat(gameRun.trickAsCards(1)).isEqualTo(new Card[]{Card.of("S8"), Card.of("RX"), Card.of("GO")});
     }
 }

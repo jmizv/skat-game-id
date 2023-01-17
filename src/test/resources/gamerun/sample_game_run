@@ -1,13 +1,13 @@
 S7S8S9SXSUSOSKSAR7R8 -- front
 R9RXRURORKRAG7G8G9GX -- middle
 GUGOGKGAE7E8E9EXEUEO -- rear
-EKEA -- Skat before game
-R7R8 -- Skat on announced game
-07 -- bid of front
-05 -- bid of middle
-04 -- bid of rear
-41111 -- spades
-012 -- all player played their first card.
+EKEA -- Skat before game ..  /  / 63
+R7R8 -- Skat on announced game / 2 * 5 bit = 10 bit / 64 .. 73
+07 -- bid of front / 7 bit
+05 -- bid of middle / 7 bit
+04 -- bid of rear / 7 bit
+41111 -- spades / 3 bit + 4 * 1 bit = 7 bit
+012 -- all player played their first card. / 3 * 4 bit * 10 = 120 bit
 123
 234
 345

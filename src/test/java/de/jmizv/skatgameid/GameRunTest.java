@@ -1,18 +1,22 @@
 package de.jmizv.skatgameid;
 
+import de.jmizv.skatgameid.io.SkatGameRunReader;
 import org.junit.jupiter.api.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GameRunTest {
 
     @Test
-    void test() {
-        GameRun gameRun = new GameRun(Game.random(200),
-                GameType.of(GameTypeKind.GRAND),
-                new int[]{1, 0, 0},
-                new Card[]{Card.of("R7"), Card.of("S9")},
-                new int[1][]);
+    void test() throws URISyntaxException, IOException {
+        String resourceName = "/gamerun/sample_game_run";
+        URL resource = getClass().getResource(resourceName);
+        GameRun gameRun = new SkatGameRunReader().read(new File(resource.toURI()));
         String id = gameRun.computeId();
         assertThat(id).isNotEmpty();
     }

@@ -52,6 +52,15 @@ public class GameType {
         return _ouvertAnnounced;
     }
 
+    public String toString() {
+        return gameTypeKind().ordinal() + toString(_hand) + toString(_ouvert)
+                + toString(_handAnnounced) + toString(_ouvertAnnounced);
+    }
+
+    private String toString(boolean boolValue) {
+        return boolValue ? "1" : "0";
+    }
+
     public static GameType of(GameTypeKind kind) {
         return new GameType(kind);
     }

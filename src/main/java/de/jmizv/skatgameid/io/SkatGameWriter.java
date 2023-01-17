@@ -13,14 +13,18 @@ public class SkatGameWriter {
 
     public void write(Game game, OutputStream outputStream) {
         try (PrintWriter pw = new PrintWriter(new BufferedWriter(new OutputStreamWriter(outputStream)))) {
-            game.getPlayerFront().forEach(pw::print);
-            pw.println();
-            game.getPlayerMiddle().forEach(pw::print);
-            pw.println();
-            game.getPlayerRear().forEach(pw::print);
-            pw.println();
-            game.getSkat().forEach(pw::print);
-            pw.println();
+            write(game, pw);
         }
+    }
+
+    public void write(Game game, PrintWriter pw) {
+        game.getPlayerFront().forEach(pw::print);
+        pw.println();
+        game.getPlayerMiddle().forEach(pw::print);
+        pw.println();
+        game.getPlayerRear().forEach(pw::print);
+        pw.println();
+        game.getSkat().forEach(pw::print);
+        pw.println();
     }
 }

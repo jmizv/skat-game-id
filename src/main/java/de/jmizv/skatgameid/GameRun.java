@@ -1,12 +1,13 @@
 package de.jmizv.skatgameid;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.BitSet;
 import java.util.Optional;
 
 public class GameRun {
 
-    private static final int[] BID_VALUES = { // 73 values
+    public static final int[] BID_VALUES = { // 73 values
             0, 18, 20, 22, 23, 24, 27, 30, 33, 35, 36, 40, 44, 45, 46, 48,
             50, 54, 55, 59, 60, 63, 66, 70, 72, 77, 80, 81, 84, 88, 90, 96,
             99, 100, 108, 110, 117, 120, 121, 126, 130, 132, 135, 140, 143,
@@ -56,19 +57,56 @@ public class GameRun {
         return _skatCards[no];
     }
 
-    public Card[] trick(int index) {
+    /**
+     * @param index
+     * @return
+     */
+    public Card[] trickAsCards(int index) {
         return new Card[]{_game.getPlayerFront().get(index),
                 _game.getPlayerMiddle().get(index),
                 _game.getPlayerRear().get(index)};
     }
 
+    /**
+     * @param index
+     * @return
+     */
+    public int[] trickAsIndexes(int index) {
+        int[] trick = _cardsPlayed[index];
+        return Arrays.copyOf(trick, trick.length);
+    }
+
     public String computeId() {
-        BitSet bitset = new BitSet(92);
+        BitSet bitset = new BitSet(64 + 158);
         // the first 64 bits for the game, i.e. the card distribution before bidding.
         bitset.or(_game.computeIdAsBitSet());
+        // set the cards that are in the Skat when the game starts.
+        setBitSet(bitset, _skatCards[0].number(), 64, 5);
+        setBitSet(bitset, _skatCards[1].number(), 69, 5);
 
-        bitset.set(92);
+        setBitSet(bitset, _bids[0],74, 7);
+        setBitSet(bitset, _bids[1],81, 7);
+        setBitSet(bitset, _bids[2],88, 7);
+
+        setBitSet(bitset, _gameType.gameTypeKind().ordinal(), 95,3);
+        bitset.set(98, _gameType.isHand());
+        bitset.set(99, _gameType.isOuvert());
+        bitset.set(100, _gameType.isHandAnnounced());
+        bitset.set(101, _gameType.isOuvertAnnounced());
+
 
         return Base64.getEncoder().encodeToString(bitset.toByteArray());
+    }
+
+    private static void setBitSet(BitSet bitSet, int number, int startingIndex, int maxLength) {
+        for (int idx = 0; idx < maxLength; ++idx) {
+            if ((number & (0x01 << idx)) != 0) {
+                bitSet.set(startingIndex + maxLength - idx);
+            }
+        }
+    }
+
+    public Game game() {
+        return _game;
     }
 }
