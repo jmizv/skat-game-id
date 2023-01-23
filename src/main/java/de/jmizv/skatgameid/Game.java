@@ -41,8 +41,7 @@ public class Game {
     }
 
     /**
-     *
-     * @return the same card distribution for this game but with all cards sorted by their values
+     * @return the same card distribution for this game but with all cards sorted by their values for every player and the skat.
      */
     public Game normalized() {
         return new Game(_player1Front.stream().sorted().collect(Collectors.toList()),
@@ -51,19 +50,19 @@ public class Game {
                 _skat.stream().sorted().collect(Collectors.toList()));
     }
 
-    public List<Card> getPlayerFront() {
+    public List<Card> frontCards() {
         return _player1Front;
     }
 
-    public List<Card> getPlayerMiddle() {
+    public List<Card> middleCards() {
         return _player2Middle;
     }
 
-    public List<Card> getPlayerRear() {
+    public List<Card> rearCards() {
         return _player3Rear;
     }
 
-    public List<Card> getSkat() {
+    public List<Card> skatCards() {
         return _skat;
     }
 
@@ -77,13 +76,13 @@ public class Game {
      */
     BitSet computeIdAsBitSet() {
         BitSet bitSet = new BitSet(32 * 2);
-        for (Card card : getPlayerMiddle()) {
+        for (Card card : middleCards()) {
             bitSet.set(card.number() * 2);
         }
-        for (Card card : getPlayerRear()) {
+        for (Card card : rearCards()) {
             bitSet.set(card.number() * 2 + 1);
         }
-        for (Card card : getSkat()) {
+        for (Card card : skatCards()) {
             bitSet.set(card.number() * 2);
             bitSet.set(card.number() * 2 + 1);
         }
@@ -103,13 +102,24 @@ public class Game {
         return new BigInteger(computeIdAsBitSet().toByteArray());
     }
 
+    /**
+     * Builds a Game object from the given id. Note that the object will not be normalized,
+     * i.e. the order of the cards per player stays unchanged.
+     *
+     * @param id the game identification
+     * @return a Game object
+     */
+
     public static Game ofId(String id) {
         if (id.length() < 2) {
             throw new IllegalArgumentException("Game id \"" + id + "\" is too short.");
         }
-        BitSet bitSet = BitSet.valueOf(Base64.getDecoder().decode(id));
+        return ofBitSet(BitSet.valueOf(Base64.getDecoder().decode(id)));
+    }
+
+     public static Game ofBitSet(BitSet bitSet) {
         if (bitSet.size() != 64) {
-            throw new IllegalArgumentException("Game id \"" + id + "\" is not compatible for decoding as it results in " + bitSet.size() / 2 + " cards.");
+            throw new IllegalArgumentException("BitSet is not compatible for decoding as it results in " + bitSet.size() / 2 + " cards.");
         }
         Game.Builder builder = Game.builder();
         for (int i = 0; i < 64; i += 2) {
@@ -144,10 +154,21 @@ public class Game {
         return Objects.hash(_player1Front, _player2Middle, _player3Rear, _skat);
     }
 
+    /**
+     * Generates a random Game object using the current time in millis as a seed for the Random object.
+     *
+     * @return a random Game object
+     */
     public static Game random() {
         return random(System.currentTimeMillis());
     }
 
+    /**
+     * Generates a random Game object from the given seed. Using the same seed will result in the same Game object.
+     *
+     * @param seed a seed for the used Random initialization
+     * @return a Game object
+     */
     public static Game random(long seed) {
         List<Card> cards = new ArrayList<>();
         for (Suit suit : Suit.values()) {

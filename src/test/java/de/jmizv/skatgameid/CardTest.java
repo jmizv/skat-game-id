@@ -1,9 +1,13 @@
 package de.jmizv.skatgameid;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -50,27 +54,46 @@ class CardTest {
     }
 
     @Test
-    void can_be_played_upon() {
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.NULL)).isTrue();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.GRAND)).isTrue();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.DIAMONDS)).isTrue();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.HEARTS)).isTrue();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.SPADES)).isTrue();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("S8"), GameTypeKind.CLUBS)).isTrue();
+    void cannot_be_played_upon_with_same_two_cards() {
+        assertThatThrownBy(() -> Card.of(14).canBePlayedUpon(Card.of(14), GameTypeKind.NULL))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Cannot check for played upon with the same two cards.");
+    }
 
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.NULL)).isTrue();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.GRAND)).isFalse();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.DIAMONDS)).isTrue();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.HEARTS)).isFalse();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.SPADES)).isFalse();
-        assertThat(Card.of("S7").canBePlayedUpon(Card.of("SU"), GameTypeKind.CLUBS)).isFalse();
+    @ParameterizedTest
+    @MethodSource("canBePlayedUponArguments")
+    void can_be_played_upon(Card card, Card toBePlayed, GameTypeKind gameTypeKind, boolean expectedResult) {
+        assertThat(card.canBePlayedUpon(toBePlayed, gameTypeKind)).isEqualTo(expectedResult);
+    }
 
-        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.NULL)).isTrue();
-        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.GRAND)).isFalse();
-        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.DIAMONDS)).isTrue();
-        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.HEARTS)).isFalse();
-        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.SPADES)).isFalse();
-        assertThat(Card.of("SU").canBePlayedUpon(Card.of("S9"), GameTypeKind.CLUBS)).isFalse();
+    private static Stream<Arguments> canBePlayedUponArguments() {
+        return Stream.of(
+                Arguments.of(Card.of("S7"), Card.of("S8"), GameTypeKind.NULL, true),
+                Arguments.of(Card.of("S7"), Card.of("S8"), GameTypeKind.GRAND, true),
+                Arguments.of(Card.of("S7"), Card.of("S8"), GameTypeKind.DIAMONDS, true),
+                Arguments.of(Card.of("S7"), Card.of("S8"), GameTypeKind.HEARTS, true),
+                Arguments.of(Card.of("S7"), Card.of("S8"), GameTypeKind.SPADES, true),
+                Arguments.of(Card.of("S7"), Card.of("S8"), GameTypeKind.CLUBS, true),
+
+                Arguments.of(Card.of("S7"), Card.of("SU"), GameTypeKind.NULL, true),
+                Arguments.of(Card.of("S7"), Card.of("SU"), GameTypeKind.GRAND, false),
+                Arguments.of(Card.of("S7"), Card.of("SU"), GameTypeKind.DIAMONDS, true),
+                Arguments.of(Card.of("S7"), Card.of("SU"), GameTypeKind.HEARTS, false),
+                Arguments.of(Card.of("S7"), Card.of("SU"), GameTypeKind.SPADES, false),
+                Arguments.of(Card.of("S7"), Card.of("SU"), GameTypeKind.CLUBS, false),
+
+                Arguments.of(Card.of("SU"), Card.of("S9"), GameTypeKind.NULL, true),
+                Arguments.of(Card.of("SU"), Card.of("S9"), GameTypeKind.GRAND, false),
+                Arguments.of(Card.of("SU"), Card.of("S9"), GameTypeKind.DIAMONDS, true),
+                Arguments.of(Card.of("SU"), Card.of("S9"), GameTypeKind.HEARTS, false),
+                Arguments.of(Card.of("SU"), Card.of("S9"), GameTypeKind.SPADES, false),
+                Arguments.of(Card.of("SU"), Card.of("S9"), GameTypeKind.CLUBS, false),
+
+                Arguments.of(Card.of("SU"), Card.of("EU"), GameTypeKind.GRAND, true),
+                Arguments.of(Card.of("R9"), Card.of("E8"), GameTypeKind.GRAND, false),
+                Arguments.of(Card.of("R9"), Card.of("E8"), GameTypeKind.DIAMONDS, false),
+                Arguments.of(Card.of("R9"), Card.of("E8"), GameTypeKind.NULL, false)
+        );
     }
 
     @Test
@@ -112,8 +135,60 @@ class CardTest {
     }
 
     @Test
-    void beats_same_card() {
-        assertThatThrownBy(() -> Card.of(32).beats(GameTypeKind.GRAND, Card.of(32)))
-                .isInstanceOf(IllegalArgumentException.class);
+    void should_throw_on_beat_same_card() {
+        assertThatThrownBy(() -> Card.of(31).beats(GameTypeKind.GRAND, Card.of(31)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Can not check \"beats\" to the same card.");
+    }
+
+    @ParameterizedTest
+    @MethodSource("cardsToBeatForGrand")
+    void should_beat_in_grand(Card foreHand, Card midHand, Card rearHand, int cardThatWins) {
+        assertThat(Util.nextPlayer(GameTypeKind.GRAND, foreHand, midHand, rearHand)).isEqualTo(cardThatWins);
+    }
+
+    static Stream<Arguments> cardsToBeatForGrand() {
+        return Stream.of(
+                Arguments.arguments(Card.of("S7"), Card.of("SA"), Card.of("SU"), 2),
+                Arguments.arguments(Card.of("S7"), Card.of("SA"), Card.of("EU"), 2),
+                Arguments.arguments(Card.of("S7"), Card.of("RU"), Card.of("EU"), 2),
+                Arguments.arguments(Card.of("SX"), Card.of("S7"), Card.of("RU"), 2),
+
+                Arguments.arguments(Card.of("S7"), Card.of("SA"), Card.of("SX"), 1),
+                Arguments.arguments(Card.of("S7"), Card.of("SA"), Card.of("SK"), 1),
+                Arguments.arguments(Card.of("S7"), Card.of("SA"), Card.of("RK"), 1),
+                Arguments.arguments(Card.of("SX"), Card.of("SA"), Card.of("RK"), 1),
+
+                Arguments.arguments(Card.of("S9"), Card.of("S8"), Card.of("S7"), 0),
+                Arguments.arguments(Card.of("S9"), Card.of("E8"), Card.of("E7"), 0),
+                Arguments.arguments(Card.of("S9"), Card.of("E8"), Card.of("S7"), 0),
+                Arguments.arguments(Card.of("S9"), Card.of("S8"), Card.of("E7"), 0)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("cardsToBeatForNull")
+    void should_beat_in_null(Card foreHand, Card midHand, Card rearHand, int cardThatWins) {
+        assertThat(Util.nextPlayer(GameTypeKind.NULL, foreHand, midHand, rearHand)).isEqualTo(cardThatWins);
+    }
+
+    static Stream<Arguments> cardsToBeatForNull() {
+        return Stream.of(
+                Arguments.arguments(Card.of("S7"), Card.of("S8"), Card.of("S9"), 2),
+                Arguments.arguments(Card.of("S7"), Card.of("S9"), Card.of("S8"), 1),
+                Arguments.arguments(Card.of("S9"), Card.of("S7"), Card.of("S8"), 0),
+
+                Arguments.arguments(Card.of("S7"), Card.of("E8"), Card.of("S9"), 2),
+                Arguments.arguments(Card.of("S7"), Card.of("S9"), Card.of("E8"), 1),
+                Arguments.arguments(Card.of("S9"), Card.of("S7"), Card.of("E8"), 0),
+
+                Arguments.arguments(Card.of("SX"), Card.of("SU"), Card.of("SA"), 2),
+                Arguments.arguments(Card.of("SX"), Card.of("SA"), Card.of("SU"), 1),
+                Arguments.arguments(Card.of("SA"), Card.of("SX"), Card.of("SU"), 0),
+
+                Arguments.arguments(Card.of("S9"), Card.of("EO"), Card.of("RK"), 0),
+                Arguments.arguments(Card.of("EO"), Card.of("S9"), Card.of("RK"), 0),
+                Arguments.arguments(Card.of("EO"), Card.of("RK"), Card.of("S9"), 0)
+        );
     }
 }

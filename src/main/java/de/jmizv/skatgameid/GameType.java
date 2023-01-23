@@ -1,5 +1,7 @@
 package de.jmizv.skatgameid;
 
+import java.util.Objects;
+
 /**
  * Class represents the type of skat game.
  */
@@ -14,14 +16,6 @@ public class GameType {
 
     private GameType(GameTypeKind gameTypeKind) {
         this(gameTypeKind, false, false, false, false);
-    }
-
-    private GameType(GameTypeKind gameTypeKind, boolean isHand) {
-        this(gameTypeKind, isHand, false, false, false);
-    }
-
-    private GameType(GameTypeKind gameTypeKind, boolean isHand, boolean isOuvert) {
-        this(gameTypeKind, isHand, isOuvert, false, false);
     }
 
     private GameType(GameTypeKind gameTypeKind, boolean hand, boolean ouvert, boolean handAnnounced, boolean ouvertAnnounced) {
@@ -65,6 +59,10 @@ public class GameType {
         return new GameType(kind);
     }
 
+    public static GameType of(GameTypeKind kind, boolean hand, boolean ouvert, boolean handAnnounced, boolean ouvertAnnounced) {
+        return new GameType(kind, hand, ouvert, handAnnounced, ouvertAnnounced);
+    }
+
     public static GameType of(String gameTypeAsString) {
         if (gameTypeAsString.length() == 1) {
             return new GameType(GameTypeKind.valueOf(gameTypeAsString));
@@ -75,5 +73,22 @@ public class GameType {
         boolean handAnnounced = splitted.length >= 4 && TRUE_AS_NUMBER.equals(splitted[3]);
         boolean ouvertAnnounced = splitted.length >= 5 && TRUE_AS_NUMBER.equals(splitted[4]);
         return new GameType(GameTypeKind.of(splitted[0]), hand, ouvert, handAnnounced, ouvertAnnounced);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GameType gameType = (GameType) o;
+        return _hand == gameType._hand
+                && _ouvert == gameType._ouvert
+                && _handAnnounced == gameType._handAnnounced
+                && _ouvertAnnounced == gameType._ouvertAnnounced
+                && _gameTypeKind == gameType._gameTypeKind;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(_gameTypeKind, _hand, _ouvert, _handAnnounced, _ouvertAnnounced);
     }
 }

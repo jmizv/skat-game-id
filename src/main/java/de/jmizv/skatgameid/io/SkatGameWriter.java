@@ -18,13 +18,13 @@ public class SkatGameWriter {
     }
 
     public void write(Game game, PrintWriter pw) {
-        game.getPlayerFront().forEach(pw::print);
+        game.frontCards().forEach(pw::print);
         pw.println();
-        game.getPlayerMiddle().forEach(pw::print);
+        game.middleCards().forEach(pw::print);
         pw.println();
-        game.getPlayerRear().forEach(pw::print);
+        game.rearCards().forEach(pw::print);
         pw.println();
-        game.getSkat().forEach(pw::print);
+        game.skatCards().forEach(pw::print);
         pw.println();
     }
 }

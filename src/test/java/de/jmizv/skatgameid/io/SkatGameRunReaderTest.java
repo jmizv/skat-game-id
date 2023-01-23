@@ -35,5 +35,6 @@ class SkatGameRunReaderTest {
         assertThat(gameRun.skatCard(0)).isEqualTo(Card.of("R7"));
         assertThat(gameRun.skatCard(1)).isEqualTo(Card.of("R8"));
         assertThat(gameRun.trickAsCards(1)).isEqualTo(new Card[]{Card.of("S8"), Card.of("RX"), Card.of("GO")});
+        assertThat(gameRun.trickAsCards(9)).isEqualTo(new Card[]{Card.of("R8"), Card.of("GX"), Card.of("EO")});
     }
 }

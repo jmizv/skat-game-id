@@ -26,15 +26,15 @@ class GameTest {
     @Test
     void cards_are_sorted() {
         Game game = Game.random(0);
-        assertThat(isSorted(game.getPlayerFront())).isFalse();
-        assertThat(isSorted(game.getPlayerMiddle())).isFalse();
-        assertThat(isSorted(game.getPlayerRear())).isFalse();
+        assertThat(isSorted(game.frontCards())).isFalse();
+        assertThat(isSorted(game.middleCards())).isFalse();
+        assertThat(isSorted(game.rearCards())).isFalse();
 
         Game normalized = game.normalized();
-        assertThat(isSorted(normalized.getPlayerFront())).isTrue();
-        assertThat(isSorted(normalized.getPlayerMiddle())).isTrue();
-        assertThat(isSorted(normalized.getPlayerRear())).isTrue();
-        assertThat(isSorted(normalized.getSkat())).isTrue();
+        assertThat(isSorted(normalized.frontCards())).isTrue();
+        assertThat(isSorted(normalized.middleCards())).isTrue();
+        assertThat(isSorted(normalized.rearCards())).isTrue();
+        assertThat(isSorted(normalized.skatCards())).isTrue();
     }
 
     private boolean isSorted(List<Card> cards) {
@@ -113,6 +113,6 @@ class GameTest {
         assertThatThrownBy(() -> Game.ofId("g")).isInstanceOf(IllegalArgumentException.class).hasMessage("Game id \"g\" is too short.");
         assertThatThrownBy(() -> Game.ofId("0000")).isInstanceOf(IllegalArgumentException.class).hasMessage("Cannot add any more cards. Have already 2 cards for Skat.");
         assertThatThrownBy(() -> Game.ofId("mykAmZXGhaQ")).isInstanceOf(IllegalArgumentException.class).hasMessage("Cannot add any more cards. Have already 10 cards for Middle-Player.");
-        assertThatThrownBy(() -> Game.ofId("mykAmZXGhaQmykAmZXGhaQ")).isInstanceOf(IllegalArgumentException.class).hasMessage("Game id \"mykAmZXGhaQmykAmZXGhaQ\" is not compatible for decoding as it results in 64 cards.");
+        assertThatThrownBy(() -> Game.ofId("mykAmZXGhaQmykAmZXGhaQ")).isInstanceOf(IllegalArgumentException.class).hasMessage("BitSet is not compatible for decoding as it results in 64 cards.");
     }
 }

@@ -1,7 +1,12 @@
 # Skat-Game-Id
 
-This library should give a handy way to identify any [Skat](https://en.wikipedia.org/wiki/Skat_(card_game)) game or run by a
+This library should give a handy way to identify any [Skat](https://en.wikipedia.org/wiki/Skat_(card_game)) game or game run by a
 simple id. It also comes with a way to read and write games, i.e. the card distributions and a certain game run.
+
+Moreover, it defines two ways to store and display either a distribution of 32 Skat cards
+and a complete Skat game which includes the card distribution but also all other information
+to uniquely identify a single Skat game play. The two ways are: human-readable and by giving an
+integer (either coded decimal or by a Base64 string)
 
 ## Definitions
 
@@ -69,7 +74,8 @@ If we reverse this order, the ID becomes `r6qqVVUF` or `-88327439690491`.
 Should indicate when which player had played which card.
 And what game for what value were played and how the bidding went.
 
-We extend the previous human-readable notation:
+We extend the previous human-readable notation (note that `--` are comments and get
+discarded while reading):
 
 ```
 S7S8S9SXSUSOSKSAR7R8 -- front
@@ -81,8 +87,8 @@ R7R8 -- Skat on announced game
 05 -- bid of middle
 04 -- bid of rear
 41111 -- spades
-012 -- Denotes the index of the players cards from above, e.g. forehand played their first card etc
-123
+012 -- Denotes the index of the players cards from above, e.g.
+123 --   forehand played their first card etc.
 234
 345
 456
@@ -93,4 +99,18 @@ R7R8 -- Skat on announced game
 901
 ```
 
-There first four lines are equal to the `Game` notation.
+There first four lines are equal to the `Game` notation. That means they could be collapsed into one single line, too.
+Also, the played cards are not validated, e.g. it is not checked whether a player has correctly *bedient*.
+
+If the three values for bidding are all `0`, the game is considered to be *eingepasst*.
+
+The above game definition would result in the following Base64 encoded ID:
+
+```
+AABQVVWqqvpwKETIPCAhMbGwqKipuXl4ZCQkIA==
+```
+
+The same id as `BigInteger` would be:
+```
+129090697728898356188161029675937060363232303187716560461767712
+```
