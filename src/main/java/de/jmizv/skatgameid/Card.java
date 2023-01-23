@@ -47,6 +47,9 @@ public class Card implements Comparable<Card> {
      * @return true if this card can be played on the given card
      */
     public boolean canBePlayedUpon(Card otherCard, GameTypeKind gameType) {
+        if (this.equals(otherCard)) {
+            throw new IllegalArgumentException("Cannot check for played upon with the same two cards.");
+        }
         switch (gameType) {
             case NULL:
                 // with NULL game the colour must match
@@ -73,7 +76,7 @@ public class Card implements Comparable<Card> {
                 }
                 return getSuit() == otherCard.getSuit();
             default:
-                throw new UnsupportedOperationException("xxx");
+                throw new UnsupportedOperationException("Unsupported value: " + gameType);
         }
     }
 
@@ -140,7 +143,10 @@ public class Card implements Comparable<Card> {
         }
         switch (gameTypeKind) {
             case NULL:
-                throw new UnsupportedOperationException("Not yet implemented for NULL.");
+                if (getSuit() == card.getSuit()) {
+                    return getValue().ordinal() - card.getValue().ordinal() > 0;
+                }
+                return false;
             case GRAND: {
                 if (getValue() == Value.JACK && card.getValue() == Value.JACK) {
                     return getSuit().ordinal() - card.getSuit().ordinal() > 0;

@@ -25,9 +25,9 @@ class SkatGameReaderTest {
         assertThat(resource).isNotNull();
         Game readGame = skatGameReader.read(new File(resource.getFile()));
         assertThat(readGame).isNotNull();
-        assertThat(readGame.getPlayerFront().get(0)).isEqualTo(Card.of("S7"));
-        assertThat(readGame.getPlayerMiddle().get(0)).isEqualTo(Card.of("R9"));
-        assertThat(readGame.getPlayerRear().get(0)).isEqualTo(Card.of("GU"));
-        assertThat(readGame.getSkat().get(0)).isEqualTo(Card.of("EK"));
+        assertThat(readGame.frontCards().get(0)).isEqualTo(Card.of("S7"));
+        assertThat(readGame.middleCards().get(0)).isEqualTo(Card.of("R9"));
+        assertThat(readGame.rearCards().get(0)).isEqualTo(Card.of("GU"));
+        assertThat(readGame.skatCards().get(0)).isEqualTo(Card.of("EK"));
     }
 }
